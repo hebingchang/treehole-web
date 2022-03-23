@@ -59,7 +59,7 @@ import {
   setCategories,
   setFeaturedTags,
 } from '../states/site'
-import { getWebSource } from "../utils/env"
+import { getWebSource } from '../utils/env'
 
 const popupCenter = ({
   url,
