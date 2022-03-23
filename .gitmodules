@@ -1,0 +1,3 @@
+[submodule "src/protos"]
+	path = src/protos
+	url = git@github.com:dyweb/treehole-space-protos.git
