@@ -1,4 +1,4 @@
-import { Box, Fade, Heading, Spinner } from '@chakra-ui/react'
+import { Box, Center, Fade, Heading, Spinner } from '@chakra-ui/react'
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
@@ -25,13 +25,13 @@ const IndexPage = () => {
         {}
       )
       .then((res) => {
-        console.log(res.getThreadsList().length)
         setThreads((prevState) => [...prevState, ...res.getThreadsList()])
       })
   }, [threads, setThreads])
 
   return (
-    <Fade in>
+    <Fade in style={{ flex: 1 }}>
+      <title>时间线</title>
       <Heading>时间线</Heading>
 
       <Box mt={8}>
@@ -39,9 +39,9 @@ const IndexPage = () => {
           next={loadMore}
           hasMore
           loader={
-            <Box maxW='2xl' alignItems='center'>
+            <Center maxW='2xl' h='12' mb={4}>
               <Spinner />
-            </Box>
+            </Center>
           }
           dataLength={threads.length}
           style={{ overflow: 'visible' }}

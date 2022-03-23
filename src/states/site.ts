@@ -5,8 +5,8 @@ import type { RootState } from './store'
 
 // Define a type for the slice state
 interface SiteState {
-  categories: Category[]
-  featuredTags: Tag[]
+  categories: Category.AsObject[]
+  featuredTags: Tag.AsObject[]
 }
 
 // Define the initial state using that type
@@ -20,10 +20,10 @@ export const siteSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    setCategories: (state, action: PayloadAction<Category[]>) => {
+    setCategories: (state, action: PayloadAction<Category.AsObject[]>) => {
       state.categories = action.payload
     },
-    setFeaturedTags: (state, action: PayloadAction<Tag[]>) => {
+    setFeaturedTags: (state, action: PayloadAction<Tag.AsObject[]>) => {
       state.featuredTags = action.payload
     },
   },

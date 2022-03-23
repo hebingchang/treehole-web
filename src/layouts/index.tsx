@@ -39,6 +39,7 @@ import {
 import Cookies from 'js-cookie'
 import { OidcClient, UserManagerSettings } from 'oidc-client-ts'
 import React, { useEffect, useState } from 'react'
+import { Provider } from 'react-redux'
 import UserCard from '../components/user_card'
 // @ts-ignore
 import avatar from '../images/avatar.png'
@@ -59,6 +60,7 @@ import {
   setCategories,
   setFeaturedTags,
 } from '../states/site'
+import store from '../states/store'
 import { getWebSource } from '../utils/env'
 
 const popupCenter = ({
@@ -93,7 +95,7 @@ const popupCenter = ({
   )
 }
 
-export default function Layout({ children, pageContext }: any) {
+const Layout = ({ children, pageContext }: any) => {
   const { isOpen, onToggle } = useDisclosure()
   const { colorMode, toggleColorMode } = useColorMode()
   const [loading, setLoading] = useState(false)
@@ -113,13 +115,13 @@ export default function Layout({ children, pageContext }: any) {
       href: '#',
     },
     ...featuredTags.map((tag) => ({
-      label: tag.getName(),
+      label: tag.name,
       href: '#',
     })),
     {
       label: '版块',
       children: categories.map((c) => ({
-        label: c.getName(),
+        label: c.name,
         href: '#',
       })),
     },
@@ -186,16 +188,16 @@ export default function Layout({ children, pageContext }: any) {
       dispatch(setUser(res.toObject()))
       dispatch(
         setCategories(
-          (
-            await rpc.client.getAllCategories(new EmptyRequest(), {})
-          ).getCategoriesList()
+          (await rpc.client.getAllCategories(new EmptyRequest(), {}))
+            .getCategoriesList()
+            .map((c) => c.toObject())
         )
       )
       dispatch(
         setFeaturedTags(
-          (
-            await rpc.client.getBrowsableTags(new EmptyRequest(), {})
-          ).getTagsList()
+          (await rpc.client.getBrowsableTags(new EmptyRequest(), {}))
+            .getTagsList()
+            .map((t) => t.toObject())
         )
       )
     } catch (e) {
@@ -204,6 +206,7 @@ export default function Layout({ children, pageContext }: any) {
   }
 
   useEffect(() => {
+    console.log('layout load')
     getProfile().finally(() => setInitialized(true))
   }, [])
 
@@ -495,4 +498,12 @@ interface NavItem {
   subLabel?: string
   children?: Array<NavItem>
   href?: string
+}
+
+export default function Root(props: any) {
+  return (
+    <Provider store={store}>
+      <Layout {...props} />
+    </Provider>
+  )
 }

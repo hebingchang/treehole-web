@@ -9,9 +9,7 @@ const NotFoundPage = () => {
       <Heading as='h2' size='xl' mt={6} mb={2}>
         404
       </Heading>
-      <Text color='gray.500'>
-        没有找到您访问的网页
-      </Text>
+      <Text color='gray.500'>没有找到您访问的网页</Text>
     </Box>
   )
 }
