@@ -142,8 +142,8 @@ export default function Layout({ children, pageContext }: any) {
           },
           client_id: res.getClientId(),
           scope: res.getScopesList().join(' '),
-          redirect_uri: 'http://localhost:8000/auth/jaccount',
-          popup_redirect_uri: 'http://localhost:8000/auth/jaccount',
+          redirect_uri: `${process.env.GATSBY_TREEHOLE_HOST}/auth/jaccount`,
+          popup_redirect_uri: `${process.env.GATSBY_TREEHOLE_HOST}/auth/jaccount`,
           loadUserInfo: false,
         }
         const client = new OidcClient(settings)
