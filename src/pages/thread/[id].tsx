@@ -5,6 +5,7 @@ import { useMutex } from 'react-context-mutex'
 import { Helmet } from 'react-helmet'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import PostCard from '../../components/post_card'
+import ThreadDetailCard from '../../components/thread_detail_card'
 import { Post } from '../../services/post_pb'
 import rpc from '../../services/rpc'
 import { Thread } from '../../services/thread_pb'
@@ -63,6 +64,8 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
       <Helmet>
         <title>{formatThreadId(params.id)}</title>
       </Helmet>
+
+      <ThreadDetailCard thread={thread?.toObject()} />
 
       {thread ? (
         <Box mt={8}>

@@ -34,3 +34,37 @@ export function getPostTime(time?: any) {
     return createdAt.format('YYYY-MM-DD HH:mm')
   }
 }
+
+export function getThreadTime(time?: any) {
+  if (!time) return ''
+  const createdAt = moment(time.seconds * 1000)
+  if (createdAt.isSame(new Date(), 'day')) {
+    return createdAt.fromNow()
+  } else if (createdAt.isSame(moment().subtract(1, 'day'), 'day')) {
+    return '昨天 ' + createdAt.format('HH:mm')
+  } else if (createdAt.isSame(moment().subtract(2, 'days'), 'day')) {
+    return '前天 ' + createdAt.format('HH:mm')
+  } else if (createdAt.isSame(new Date(), 'year')) {
+    return createdAt.format('MM-DD HH:mm')
+  } else {
+    return createdAt.format('YYYY-MM-DD HH:mm')
+  }
+}
+
+export function stringToColour(str: string) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  let colour = '#'
+  let sumColour = 0
+  for (let i = 0; i < 3; i++) {
+    let value = (hash >> (i * 8)) & 0xff
+    sumColour += value * [0.299, 0.587, 0.114][i]
+    colour += ('00' + value.toString(16)).substr(-2)
+  }
+  return {
+    bg: colour,
+    color: sumColour > 186 ? '#000000' : '#ffffff',
+  }
+}

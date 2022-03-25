@@ -44,6 +44,7 @@
     "react-markdown": "^8.0.1",
     "react-redux": "^7.2.6",
     "remark-breaks": "^3.0.2",
+    "remark-emoji": "^3.0.2",
     "use-query-params": "^1.2.3"
   },
   "devDependencies": {

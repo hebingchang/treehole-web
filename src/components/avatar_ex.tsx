@@ -1,7 +1,8 @@
 import { Icon } from '@chakra-ui/icons'
-import { Avatar, AvatarProps } from '@chakra-ui/react'
+import { Avatar, AvatarProps, Center, Text } from '@chakra-ui/react'
 import React from 'react'
 import { FaUserCog } from 'react-icons/fa'
+import { stringToColour } from '../utils/misc'
 
 interface AvatarExProps extends AvatarProps {
   code: string
@@ -15,17 +16,26 @@ const AvatarEx = ({ code, isAdmin, isAlice, ...props }: AvatarExProps) => {
       <Avatar
         bg='#002F51'
         icon={<Icon as={FaUserCog} color='white' />}
-        w={10}
-        h={10}
+        w={[9, 10]}
+        h={[9, 10]}
       />
     )
   }
-  let name = code
+  let abbr = code.substr(0, 2)
   const caps = code.match(/[A-Z]/g) || []
-  if (!isAlice && caps.length === 2 && code.length !== 7) {
-    name = code.split(caps[1])[0] + ' ' + caps[1] + code.split(caps[1])[1]
+  if (isAlice) {
+    abbr = code[0]
+  } else if (caps.length === 2 && code.length !== 7) {
+    abbr = caps.join('')
   }
-  return <Avatar name={name} w={10} h={10} />
+  const { bg, color } = stringToColour(code)
+  return (
+    <Center w={[9, 10]} h={[9, 10]} bg={bg} borderRadius='50%'>
+      <Text fontSize='md' color={color}>
+        {abbr}
+      </Text>
+    </Center>
+  )
 }
 
 export default AvatarEx

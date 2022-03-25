@@ -49,7 +49,7 @@ const PostCard = ({ post, thread }: PostCardProps) => {
     >
       <Box py={[3, 5]} px={[4, 5]}>
         <HStack justifyContent='space-between' alignItems='start'>
-          <HStack display='flex' spacing={3}>
+          <HStack display='flex' spacing={2}>
             <AvatarEx
               code={post.getIdentityCode()}
               isAlice={thread.getIsAlice() && thread.getIsAlice()?.getValue()}
@@ -66,7 +66,7 @@ const PostCard = ({ post, thread }: PostCardProps) => {
               </Text>
             </VStack>
           </HStack>
-          <Text color='gray.500' fontSize='sm'>
+          <Text color='gray.500' fontSize={['xs', 'sm']}>
             {post.getFloor()}楼
           </Text>
         </HStack>
@@ -99,7 +99,7 @@ const PostCard = ({ post, thread }: PostCardProps) => {
         <HStack display='flex' justifyContent='space-between' mt={4}>
           <HStack spacing={1}>
             <Icon as={IoBeerOutline} color='gray.500' />
-            <Text color='gray.500' fontSize='sm'>
+            <Text color='gray.500' fontSize='xs'>
               {post.getAppreciationCount()}
             </Text>
           </HStack>
@@ -107,7 +107,7 @@ const PostCard = ({ post, thread }: PostCardProps) => {
           <HStack display='flex' alignItems='baseline' spacing={4}>
             <HStack spacing={1}>
               <Icon as={AiOutlineLike} color='gray.500' />
-              <Text color='gray.500' fontSize='sm'>
+              <Text color='gray.500' fontSize='xs'>
                 {post.getLikeCount() - post.getHateCount()}
               </Text>
             </HStack>
