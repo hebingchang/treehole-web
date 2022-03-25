@@ -1,32 +1,48 @@
 import { Box, Center, Fade, Heading, Spinner } from '@chakra-ui/react'
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
+import { useMutex } from 'react-context-mutex'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import ThreadBriefCard from '../components/thread_brief_card'
 import rpc from '../services/rpc'
 import { Thread } from '../services/thread_pb'
 import { Sort, ThreadsQueryRequest } from '../services/treehole_pb'
 
-const IndexPage = () => {
-  const [threads, setThreads] = useState<Thread[]>([])
+const IndexPage = ({ location }: any) => {
+  const [threads, setThreads] = useState<Thread.AsObject[]>(
+    window.history.state?.threads ?? []
+  )
+  const MutexRunner = useMutex()
+  const mutex = new MutexRunner('threadsLoader')
 
   useEffect(() => {
-    rpc.client
-      .getLatestThreads(new ThreadsQueryRequest().setSort(Sort.SORTDESC), {})
-      .then((res) => setThreads(res.getThreadsList()))
+    if (threads.length === 0) {
+      loadMore()
+    }
   }, [])
 
   const loadMore = useCallback(() => {
-    const last = threads[threads.length - 1].getLastReplyAt()
-    if (!last) return
-    rpc.client
-      .getLatestThreads(
-        new ThreadsQueryRequest().setSort(Sort.SORTDESC).setLast(last),
-        {}
-      )
-      .then((res) => {
-        setThreads((prevState) => [...prevState, ...res.getThreadsList()])
-      })
+    mutex.run(async () => {
+      mutex.lock()
+      const last =
+        threads.length === 0 ? '' : threads[threads.length - 1].lastReplyAt
+      rpc.client
+        .getLatestThreads(
+          new ThreadsQueryRequest().setSort(Sort.SORTDESC).setLast(last),
+          {}
+        )
+        .then((res) => {
+          setThreads((prevState) => {
+            const newState = [...prevState, ...res.toObject().threadsList]
+            window.history.replaceState(
+              { key: location.key, threads: newState },
+              ''
+            )
+            return newState
+          })
+        })
+        .finally(() => mutex.unlock())
+    })
   }, [threads, setThreads])
 
   return (
@@ -47,7 +63,7 @@ const IndexPage = () => {
           style={{ overflow: 'visible' }}
         >
           {threads.map((thread) => (
-            <ThreadBriefCard thread={thread} key={thread.getModel()?.getId()} />
+            <ThreadBriefCard thread={thread} key={thread.model?.id} />
           ))}
         </InfiniteScroll>
       </Box>

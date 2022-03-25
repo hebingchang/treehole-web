@@ -10,6 +10,7 @@ const config: GatsbyConfig = {
     siteUrl: `https://web.treehole.space`,
   },
   plugins: [
+    `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
       resolve: '@chakra-ui/gatsby-plugin',

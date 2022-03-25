@@ -13,7 +13,7 @@ import {
 } from '../utils/misc'
 
 interface ThreadBriefCardProps {
-  thread: Thread
+  thread: Thread.AsObject
 }
 
 const ThreadBriefCard = ({ thread }: ThreadBriefCardProps) => {
@@ -30,39 +30,44 @@ const ThreadBriefCard = ({ thread }: ThreadBriefCardProps) => {
       }}
       cursor='pointer'
       onClick={() => {
-        navigate(`/thread/${thread.getModel()?.getId()}`)
+        navigate(`/thread/${thread.model?.id}`)
       }}
     >
       <Box p='5'>
         <HStack display='flex' justifyContent='space-between' spacing={1}>
-          <Badge>{formatThreadId(thread.getModel()?.getId())}</Badge>
+          <Badge>{formatThreadId(thread.model?.id)}</Badge>
           <Box as='span' color='gray.500' fontSize='sm'>
-            {getLastReplyAt(thread.getLastReplyAt())}
+            {getLastReplyAt(thread.lastReplyAt)}
           </Box>
         </HStack>
 
         <HStack mt='2' mb='1' justifyContent='space-between'>
           <Box fontWeight='semibold' as='h4' lineHeight='tight'>
-            {thread.getTitle()}
+            {thread.title}
           </Box>
-          {thread.getIsTop() ? <Icon as={BsFillPinAngleFill} /> : null}
+          {thread.isTop ? <Icon as={BsFillPinAngleFill} /> : null}
         </HStack>
 
-        <Box as='span' color='gray.500' fontSize='sm' noOfLines={3}>
-          {pangu.spacing(thread.getPreview())}
-        </Box>
+        <Text
+          color='gray.500'
+          fontSize='sm'
+          noOfLines={3}
+          whiteSpace='pre-line'
+        >
+          {pangu.spacing(thread.preview)}
+        </Text>
 
         <HStack display='flex' justifyContent='space-between' mt={2}>
           <HStack display='flex' alignItems='baseline' spacing={1}>
-            <Badge px='1.5'>{thread.getCategory()?.getName()}</Badge>
-            {thread.getTagsList().map((tag) => (
+            <Badge px='1.5'>{thread.category?.name}</Badge>
+            {thread.tagsList.map((tag) => (
               <Badge
                 px='1.5'
-                bgColor={getColorFromNumber(tag.getColor())}
+                bgColor={getColorFromNumber(tag.color)}
                 color='white'
-                key={tag.getModel()?.getId()}
+                key={tag.model?.id}
               >
-                #{tag.getName()}
+                #{tag.name}
               </Badge>
             ))}
           </HStack>
@@ -71,19 +76,19 @@ const ThreadBriefCard = ({ thread }: ThreadBriefCardProps) => {
             <HStack spacing={1}>
               <Icon as={AiOutlineEye} color='gray.500' />
               <Text color='gray.500' fontSize='xs'>
-                {thread.getViewCount()}
+                {thread.viewCount}
               </Text>
             </HStack>
             <HStack spacing={1}>
               <Icon as={AiOutlineLike} color='gray.500' />
               <Text color='gray.500' fontSize='xs'>
-                {thread.getLikeCount()}
+                {thread.likeCount}
               </Text>
             </HStack>
             <HStack spacing={1}>
               <Icon as={AiOutlineMessage} color='gray.500' />
               <Text color='gray.500' fontSize='xs'>
-                {thread.getReplyCount()}
+                {thread.replyCount}
               </Text>
             </HStack>
           </HStack>

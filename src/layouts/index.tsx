@@ -36,9 +36,13 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import { Link as GatsbyLink } from 'gatsby'
 import Cookies from 'js-cookie'
+import moment from 'moment'
+import 'moment/locale/zh-cn'
 import { OidcClient, UserManagerSettings } from 'oidc-client-ts'
 import React, { useEffect, useState } from 'react'
+import { Helmet } from 'react-helmet'
 import { Provider } from 'react-redux'
 import UserCard from '../components/user_card'
 // @ts-ignore
@@ -62,6 +66,8 @@ import {
 } from '../states/site'
 import store from '../states/store'
 import { getWebSource } from '../utils/env'
+
+moment.locale('zh-cn')
 
 const popupCenter = ({
   url,
@@ -108,7 +114,7 @@ const Layout = ({ children, pageContext }: any) => {
   const navItems: Array<NavItem> = [
     {
       label: '时间线',
-      href: '#',
+      href: '/',
     },
     {
       label: '热门',
@@ -206,7 +212,9 @@ const Layout = ({ children, pageContext }: any) => {
   }
 
   useEffect(() => {
-    console.log('layout load')
+    window.addEventListener('beforeunload', () => {
+      window.history.replaceState({}, '')
+    })
     getProfile().finally(() => setInitialized(true))
   }, [])
 
@@ -352,8 +360,9 @@ const DesktopNav = ({ navItems }: { navItems: Array<NavItem> }) => {
           <Popover trigger='hover' placement='bottom-start'>
             <PopoverTrigger>
               <Link
+                as={GatsbyLink}
                 p={2}
-                href={navItem.href ?? '#'}
+                to={navItem.href ?? '/'}
                 fontSize='sm'
                 fontWeight={500}
                 color={linkColor}
@@ -503,6 +512,9 @@ interface NavItem {
 export default function Root(props: any) {
   return (
     <Provider store={store}>
+      <Helmet>
+        <title>亦可赛艇</title>
+      </Helmet>
       <Layout {...props} />
     </Provider>
   )
