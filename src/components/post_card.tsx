@@ -1,23 +1,44 @@
-import { Icon } from '@chakra-ui/icons'
-import { Box, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import pangu from 'pangu'
-import React from 'react'
-import { AiOutlineDislike, AiOutlineLike } from 'react-icons/ai'
-import { IoBeerOutline } from 'react-icons/io5'
+import React, { useEffect, useState } from 'react'
+import {
+  AiFillDislike,
+  AiFillLike,
+  AiOutlineDislike,
+  AiOutlineLike,
+} from 'react-icons/ai'
+import { IoBeer, IoBeerOutline } from 'react-icons/io5'
 import { IdentityType } from '../services/identity_pb'
 import { Post, PostStatus } from '../services/post_pb'
+import { RateType } from '../services/rate_pb'
+import rpc from '../services/rpc'
 import { Thread } from '../services/thread_pb'
-import { getPostTime } from '../utils/misc'
+import { AppreciateRequest, RateRequest } from '../services/treehole_pb'
+import { getThreadTime } from '../utils/misc'
+import ActionIcon from './action_icon'
 import AvatarEx from './avatar_ex'
 import ExcitedMarkdown from './excited_markdown'
 
 interface PostCardProps {
   thread: Thread
   post: Post
+  onUpdate?: (thread: Post) => void
 }
 
-const PostCard = ({ post, thread }: PostCardProps) => {
-  if (post.getStatus() === PostStatus.POSTSTATUSKILLED) {
+const PostCard = ({ post, thread, onUpdate }: PostCardProps) => {
+  const [_post, setPost] = useState(post.toObject())
+  const [_thread, setThread] = useState(thread.toObject())
+  const [updating, setUpdating] = useState(false)
+
+  useEffect(() => {
+    setPost(post.toObject())
+  }, [post])
+
+  useEffect(() => {
+    setThread(thread.toObject())
+  }, [thread])
+
+  if (_post.status === PostStatus.POSTSTATUSKILLED) {
     return (
       <Box
         maxW='2xl'
@@ -32,7 +53,7 @@ const PostCard = ({ post, thread }: PostCardProps) => {
               此楼已被删除。
             </Text>
             <Text color='gray.500' fontSize='sm'>
-              {post.getFloor()}楼
+              {_post.floor}楼
             </Text>
           </HStack>
         </Box>
@@ -51,27 +72,25 @@ const PostCard = ({ post, thread }: PostCardProps) => {
         <HStack justifyContent='space-between' alignItems='start'>
           <HStack display='flex' spacing={2}>
             <AvatarEx
-              code={post.getIdentityCode()}
-              isAlice={thread.getIsAlice() && thread.getIsAlice()?.getValue()}
-              isAdmin={
-                post.getIdentity()?.getType() === IdentityType.IDENTITYTYPEADMIN
-              }
+              code={_post.identityCode}
+              isAlice={_thread.isAlice && _thread.isAlice?.value}
+              isAdmin={_post.identity?.type === IdentityType.IDENTITYTYPEADMIN}
             />
             <VStack spacing={0} alignItems='start'>
               <Text fontWeight='600' fontSize={['sm', 'md']}>
-                {post.getIdentityCode()}
+                {_post.identityCode}
               </Text>
               <Text color='gray.500' fontSize={['xs', 'sm']}>
-                {getPostTime(post.getModel()?.getCreatedAt())}
+                {getThreadTime(_post.model?.createdAt)}
               </Text>
             </VStack>
           </HStack>
           <Text color='gray.500' fontSize={['xs', 'sm']}>
-            {post.getFloor()}楼
+            {_post.floor}楼
           </Text>
         </HStack>
 
-        {post.hasReplyToPost() ? (
+        {_post.replyToPost ? (
           <Box
             mt={4}
             bg='gray.50'
@@ -83,35 +102,102 @@ const PostCard = ({ post, thread }: PostCardProps) => {
             _dark={{ bg: 'gray.700', color: 'gray.400' }}
           >
             <Text fontWeight='600' mb={1}>
-              回复 {post.getReplyToPost()?.getFloor()}楼{' '}
-              {post.getReplyToPost()?.getIdentityCode()}:
+              回复 {_post.replyToPost.floor}楼 {_post.replyToPost.identityCode}:
             </Text>
             <Text noOfLines={3} whiteSpace='pre-line'>
-              {pangu.spacing(post.getReplyToPost()!.getPreview())}
+              {pangu.spacing(_post.replyToPost.preview)}
             </Text>
           </Box>
         ) : null}
 
         <Box mt={4}>
-          <ExcitedMarkdown children={pangu.spacing(post.getContent())} />
+          <ExcitedMarkdown children={pangu.spacing(_post.content)} />
         </Box>
 
         <HStack display='flex' justifyContent='space-between' mt={4}>
-          <HStack spacing={1}>
-            <Icon as={IoBeerOutline} color='gray.500' />
-            <Text color='gray.500' fontSize='xs'>
-              {post.getAppreciationCount()}
-            </Text>
-          </HStack>
+          <ActionIcon
+            icon={IoBeerOutline}
+            activeIcon={IoBeer}
+            value={_post.appreciationCount}
+            isActive={_post.isAppreciated}
+            disabled={updating || _post.isAppreciated}
+            needConfirm
+            confirmText='确定花费 1 个小鱼干感谢层主？'
+            onToggle={(v) => {
+              setPost((prevState) => ({
+                ...prevState,
+                appreciationCount: prevState.appreciationCount + 1,
+                isAppreciated: v,
+              }))
+              rpc.client
+                .appreciatePost(
+                  new AppreciateRequest().setId(_post.model!.id).setAmount(1),
+                  {}
+                )
+                .then((res) => {
+                  onUpdate && onUpdate(res)
+                })
+            }}
+          />
 
-          <HStack display='flex' alignItems='baseline' spacing={4}>
-            <HStack spacing={1}>
-              <Icon as={AiOutlineLike} color='gray.500' />
-              <Text color='gray.500' fontSize='xs'>
-                {post.getLikeCount() - post.getHateCount()}
-              </Text>
-            </HStack>
-            <Icon as={AiOutlineDislike} color='gray.500' />
+          <HStack display='flex' alignItems='center' spacing={3}>
+            {updating ? <Spinner color='gray.500' w={3.5} h={3.5} /> : null}
+            <ActionIcon
+              icon={AiOutlineLike}
+              activeIcon={AiFillLike}
+              value={_post.likeCount - _post.hateCount}
+              isActive={_post.isLike}
+              disabled={updating || _post.isHate}
+              onToggle={(v) => {
+                setUpdating(true)
+                setPost((prevState) => ({
+                  ...prevState,
+                  likeCount: prevState.likeCount + (v ? 1 : -1),
+                  isLike: v,
+                }))
+                rpc.client
+                  .ratePost(
+                    new RateRequest()
+                      .setId(_post.model!.id)
+                      .setType(
+                        v ? RateType.RATETYPELIKE : RateType.RATETYPENORMAL
+                      ),
+                    {}
+                  )
+                  .then((res) => {
+                    onUpdate && onUpdate(res)
+                    setUpdating(false)
+                  })
+              }}
+            />
+            <ActionIcon
+              icon={AiOutlineDislike}
+              activeIcon={AiFillDislike}
+              isActive={_post.isHate}
+              disabled={updating || _post.isLike}
+              activeColor='gray.500'
+              onToggle={(v) => {
+                setUpdating(true)
+                setPost((prevState) => ({
+                  ...prevState,
+                  hateCount: prevState.hateCount + (v ? 1 : -1),
+                  isHate: v,
+                }))
+                rpc.client
+                  .ratePost(
+                    new RateRequest()
+                      .setId(_post.model!.id)
+                      .setType(
+                        v ? RateType.RATETYPEHATE : RateType.RATETYPENORMAL
+                      ),
+                    {}
+                  )
+                  .then((res) => {
+                    onUpdate && onUpdate(res)
+                    setUpdating(false)
+                  })
+              }}
+            />
           </HStack>
         </HStack>
       </Box>

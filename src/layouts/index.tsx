@@ -314,7 +314,7 @@ const Layout = ({ children, pageContext }: any) => {
       </Collapse>
 
       {initialized && user ? (
-        <Container maxW='container.xl'>
+        <Container maxW='container.xl' px={[2, 4]}>
           <HStack mt={8} alignItems='start' justifyContent='space-between'>
             {children}
             <Box display={{ base: 'none', md: 'flex' }}>

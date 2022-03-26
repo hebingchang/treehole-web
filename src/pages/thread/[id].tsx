@@ -62,10 +62,17 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
   return (
     <Fade in style={{ flex: 1 }}>
       <Helmet>
-        <title>{formatThreadId(params.id)}</title>
+        {thread ? (
+          <title>{thread.getTitle()}</title>
+        ) : (
+          <title>{formatThreadId(params.id)}</title>
+        )}
       </Helmet>
 
-      <ThreadDetailCard thread={thread?.toObject()} />
+      <ThreadDetailCard
+        thread={thread?.toObject()}
+        onUpdate={(t) => setThread(t)}
+      />
 
       {thread ? (
         <Box mt={8}>
@@ -80,11 +87,18 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
               }
               dataLength={posts.length}
             >
-              {posts.map((post) => (
+              {posts.map((post, index) => (
                 <PostCard
                   thread={thread!}
                   post={post}
                   key={post.getModel()?.getId()}
+                  onUpdate={(p) =>
+                    setPosts((prevState) => {
+                      const newState = prevState
+                      newState[index] = p
+                      return newState
+                    })
+                  }
                 />
               ))}
             </InfiniteScroll>

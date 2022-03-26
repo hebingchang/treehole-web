@@ -2,6 +2,7 @@ import { Box, Center, Fade, Heading, Spinner } from '@chakra-ui/react'
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useMutex } from 'react-context-mutex'
+import { Helmet } from 'react-helmet'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import ThreadBriefCard from '../components/thread_brief_card'
 import rpc from '../services/rpc'
@@ -47,7 +48,9 @@ const IndexPage = ({ location }: any) => {
 
   return (
     <Fade in style={{ flex: 1 }}>
-      <title>时间线</title>
+      <Helmet>
+        <title>时间线</title>
+      </Helmet>
       <Heading>时间线</Heading>
 
       <Box mt={8}>
