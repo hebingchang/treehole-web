@@ -16,6 +16,7 @@ import { Helmet } from 'react-helmet'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import PostCard from '../../components/post_card'
 import ThreadDetailCard from '../../components/thread_detail_card'
+import { useDidUpdateEffect } from '../../hooks/effect'
 import { Post } from '../../services/post_pb'
 import rpc from '../../services/rpc'
 import { Thread } from '../../services/thread_pb'
@@ -47,10 +48,10 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
       })
   }, [params.id])
 
-  useEffect(() => {
-    setHasMore(false)
+  useDidUpdateEffect(() => {
     setInitiating(true)
     setPosts([])
+    setHasMore(false)
     loadMore(true)
   }, [onlyAuthor])
 
@@ -112,8 +113,25 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
       </HStack>
 
       <Box mt={1}>
-        {thread ? (
-          <Fade in={posts.length > 0}>
+        {thread && initiating ? (
+          <Fade in>
+            <Box
+              maxW='2xl'
+              borderWidth='1px'
+              borderRadius='lg'
+              overflow='hidden'
+              my={5}
+            >
+              <Box py={[3, 5]} px={[4, 5]}>
+                <SkeletonCircle size='10' />
+                <SkeletonText mt='4' noOfLines={3} spacing='4' />
+              </Box>
+            </Box>
+          </Fade>
+        ) : null}
+
+        {thread && posts.length > 0 ? (
+          <Fade in>
             <InfiniteScroll
               next={loadMore}
               hasMore={hasMore}
@@ -146,23 +164,6 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
                 />
               ))}
             </InfiniteScroll>
-          </Fade>
-        ) : null}
-
-        {thread && initiating ? (
-          <Fade in>
-            <Box
-              maxW='2xl'
-              borderWidth='1px'
-              borderRadius='lg'
-              overflow='hidden'
-              my={4}
-            >
-              <Box py={[3, 5]} px={[4, 5]}>
-                <SkeletonCircle size='10' />
-                <SkeletonText mt='4' noOfLines={4} spacing='4' />
-              </Box>
-            </Box>
           </Fade>
         ) : null}
       </Box>
