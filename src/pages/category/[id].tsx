@@ -76,7 +76,7 @@ const CategoryPage = ({
   }
 
   return (
-    <Fade in style={{ flex: 1 }}>
+    <Fade in style={{ flex: 1, maxWidth: '100%' }}>
       <Helmet>
         <title>{category!.name}</title>
       </Helmet>

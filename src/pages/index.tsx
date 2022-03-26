@@ -47,7 +47,7 @@ const IndexPage = ({ location }: any) => {
   }, [threads, setThreads])
 
   return (
-    <Fade in style={{ flex: 1 }}>
+    <Fade in style={{ flex: 1, maxWidth: '100%' }}>
       <Helmet>
         <title>时间线</title>
       </Helmet>

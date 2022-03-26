@@ -60,7 +60,7 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
   }, [posts, params.id, sort, onlyAuthor])
 
   return (
-    <Fade in style={{ flex: 1 }}>
+    <Fade in style={{ flex: 1, maxWidth: '100%' }}>
       <Helmet>
         {thread ? (
           <title>{thread.getTitle()}</title>

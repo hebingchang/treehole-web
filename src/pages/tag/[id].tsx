@@ -70,7 +70,7 @@ const TagPage = ({
   }
 
   return (
-    <Fade in style={{ flex: 1 }}>
+    <Fade in style={{ flex: 1, maxWidth: '100%' }}>
       <Helmet>
         <title>{tag!.name}</title>
       </Helmet>
