@@ -11,6 +11,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { Link as GatsbyLink } from 'gatsby'
 import pangu from 'pangu'
 import React, { useEffect, useState } from 'react'
 import {
@@ -56,16 +57,17 @@ const ThreadDetailCard = ({ thread, onUpdate }: ThreadDetailCardProps) => {
       borderRadius='lg'
       overflow='hidden'
       mb={4}
-      transition='all .3s'
-      _hover={{
-        boxShadow: 'lg',
-      }}
     >
       {_thread ? (
         <Box py={[4, 5]} px={[4, 5]}>
           <Breadcrumb fontWeight='medium' fontSize='sm' mb={2} color='gray.500'>
             <BreadcrumbItem>
-              <BreadcrumbLink href='#'>{_thread.category?.name}</BreadcrumbLink>
+              <BreadcrumbLink
+                as={GatsbyLink}
+                to={`/category/${_thread.category?.model?.id}`}
+              >
+                {_thread.category?.name}
+              </BreadcrumbLink>
             </BreadcrumbItem>
 
             <BreadcrumbItem isCurrentPage>
