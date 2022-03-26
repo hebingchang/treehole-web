@@ -51,13 +51,7 @@ const ThreadDetailCard = ({ thread, onUpdate }: ThreadDetailCardProps) => {
   }, [thread])
 
   return (
-    <Box
-      maxW='2xl'
-      borderWidth='1px'
-      borderRadius='lg'
-      overflow='hidden'
-      mb={4}
-    >
+    <Box maxW='2xl' borderWidth='1px' borderRadius='lg' overflow='hidden'>
       {_thread ? (
         <Box py={[4, 5]} px={[4, 5]}>
           <Breadcrumb fontWeight='medium' fontSize='sm' mb={2} color='gray.500'>
@@ -78,8 +72,8 @@ const ThreadDetailCard = ({ thread, onUpdate }: ThreadDetailCardProps) => {
           </Breadcrumb>
 
           {_thread.title !== '' ? (
-            <Heading size='lg' mb={4}>
-              {_thread.title}
+            <Heading size='lg' mb={4} mt={1}>
+              {pangu.spacing(_thread.title)}
             </Heading>
           ) : (
             <Box h={2} />

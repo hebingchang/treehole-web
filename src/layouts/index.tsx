@@ -239,7 +239,10 @@ const Layout = ({ children, pageContext }: any) => {
   return (
     <Box>
       <Flex
-        bg={useColorModeValue('white', 'gray.800')}
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.8)',
+          'rgba(26, 32, 44, 0.7)'
+        )}
         color={useColorModeValue('gray.600', 'white')}
         minH='60px'
         py={{ base: 2 }}
@@ -249,6 +252,12 @@ const Layout = ({ children, pageContext }: any) => {
         borderColor={useColorModeValue('gray.200', 'gray.900')}
         align='center'
         justify='center'
+        position='fixed'
+        top={0}
+        left={0}
+        right={0}
+        zIndex={2}
+        backdropFilter='saturate(180%) blur(20px)'
       >
         <Flex align='center' flex={1} maxW='container.xl'>
           <Flex
@@ -335,8 +344,8 @@ const Layout = ({ children, pageContext }: any) => {
       </Collapse>
 
       {initialized && user ? (
-        <Container maxW='container.xl' px={[2, 4]}>
-          <HStack mt={8} alignItems='start' justifyContent='space-between'>
+        <Container maxW='container.xl' px={[2, 4]} mt='60px' pt={8}>
+          <HStack alignItems='start' justifyContent='space-between'>
             {children}
             <Box display={{ base: 'none', md: 'flex' }}>
               <UserCard />

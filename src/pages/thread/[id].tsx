@@ -1,4 +1,4 @@
-import { Box, Center, Fade, Spinner } from '@chakra-ui/react'
+import { Box, Center, Checkbox, Fade, HStack, Spinner } from '@chakra-ui/react'
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useMutex } from 'react-context-mutex'
@@ -36,28 +36,38 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
       })
   }, [params.id])
 
-  const loadMore = useCallback(() => {
-    mutex.run(async () => {
-      mutex.lock()
-      const top = 0
-      const last = posts.length === 0 ? 0 : posts[posts.length - 1].getFloor()
-      const request = new PostsQueryRequestEx()
-        .setThreadId(params.id)
-        .setTop(top)
-        .setLast(last)
-        .setSize(15)
-        .setSort(sort)
-        .setOnlyAuthor(onlyAuthor)
-        .setDirection(LoadDirection.LOADDIRECTIONDOWN)
-      rpc.client
-        .getThreadPostsEx(request, {})
-        .then((res) => {
-          setPosts((prevState) => [...prevState, ...res.getPostsList()])
-          setHasMore(res.getPostsList().length > 0)
-        })
-        .finally(() => mutex.unlock())
-    })
-  }, [posts, params.id, sort, onlyAuthor])
+  useEffect(() => {
+    setPosts([])
+    loadMore(true)
+  }, [onlyAuthor])
+
+  const loadMore = useCallback(
+    (reset = false) => {
+      mutex.run(async () => {
+        mutex.lock()
+        const top = 0
+        const last =
+          posts.length === 0 || reset ? 0 : posts[posts.length - 1].getFloor()
+        const request = new PostsQueryRequestEx()
+          .setThreadId(params.id)
+          .setTop(top)
+          .setLast(last)
+          .setSize(15)
+          .setSort(sort)
+          .setOnlyAuthor(onlyAuthor)
+          .setDirection(LoadDirection.LOADDIRECTIONDOWN)
+        rpc.client
+          .getThreadPostsEx(request, {})
+          .then((res) => {
+            if (reset) setPosts(res.getPostsList())
+            else setPosts((prevState) => [...prevState, ...res.getPostsList()])
+            setHasMore(res.getPostsList().length > 0)
+          })
+          .finally(() => mutex.unlock())
+      })
+    },
+    [posts, params.id, sort, onlyAuthor]
+  )
 
   return (
     <Fade in style={{ flex: 1, maxWidth: '100%' }}>
@@ -74,8 +84,19 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
         onUpdate={(t) => setThread(t)}
       />
 
+      <HStack mt={5} px={2} justifyContent='space-between'>
+        <Checkbox
+          isChecked={onlyAuthor}
+          onChange={(e) => {
+            setOnlyAuthor(e.target.checked)
+          }}
+        >
+          只看楼主
+        </Checkbox>
+      </HStack>
+
       {thread ? (
-        <Box mt={8}>
+        <Box mt={1}>
           <Fade in={posts.length > 0}>
             <InfiniteScroll
               next={loadMore}
