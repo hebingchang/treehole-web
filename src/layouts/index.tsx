@@ -339,12 +339,14 @@ const Layout = ({ children, pageContext }: any) => {
         </Flex>
       </Flex>
 
-      <Collapse in={isOpen} animateOpacity>
-        <MobileNav navItems={navItems} />
-      </Collapse>
+      <Box pt='60px'>
+        <Collapse in={isOpen} animateOpacity>
+          <MobileNav navItems={navItems} />
+        </Collapse>
+      </Box>
 
       {initialized && user ? (
-        <Container maxW='container.xl' px={[2, 4]} mt='60px' pt={8}>
+        <Container maxW='container.xl' px={[2, 4]} pt={8}>
           <HStack alignItems='start' justifyContent='space-between'>
             {children}
             <Box display={{ base: 'none', md: 'flex' }}>
