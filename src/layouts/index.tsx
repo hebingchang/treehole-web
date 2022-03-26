@@ -118,17 +118,17 @@ const Layout = ({ children, pageContext }: any) => {
     },
     {
       label: '热门',
-      href: '#',
+      href: '/trend',
     },
     ...featuredTags.map((tag) => ({
       label: tag.name,
-      href: '#',
+      href: `/tag/${tag.model?.id}`,
     })),
     {
       label: '版块',
       children: categories.map((c) => ({
         label: c.name,
-        href: '#',
+        href: `/category/${c.model?.id}`,
       })),
     },
   ]
@@ -358,38 +358,46 @@ const DesktopNav = ({ navItems }: { navItems: Array<NavItem> }) => {
       {navItems.map((navItem) => (
         <Box key={navItem.label}>
           <Popover trigger='hover' placement='bottom-start'>
-            <PopoverTrigger>
-              <Link
-                as={GatsbyLink}
-                p={2}
-                to={navItem.href ?? '/'}
-                fontSize='sm'
-                fontWeight={500}
-                color={linkColor}
-                _hover={{
-                  textDecoration: 'none',
-                  color: linkHoverColor,
-                }}
-              >
-                {navItem.label}
-              </Link>
-            </PopoverTrigger>
+            {({ onClose }) => (
+              <>
+                <PopoverTrigger>
+                  <Link
+                    as={GatsbyLink}
+                    p={2}
+                    to={navItem.href ?? '#'}
+                    fontSize='sm'
+                    fontWeight={500}
+                    color={linkColor}
+                    _hover={{
+                      textDecoration: 'none',
+                      color: linkHoverColor,
+                    }}
+                  >
+                    {navItem.label}
+                  </Link>
+                </PopoverTrigger>
 
-            {navItem.children && (
-              <PopoverContent
-                border={0}
-                boxShadow='xl'
-                bg={popoverContentBgColor}
-                p={4}
-                rounded='xl'
-                minW='sm'
-              >
-                <Stack>
-                  {navItem.children.map((child) => (
-                    <DesktopSubNav key={child.label} {...child} />
-                  ))}
-                </Stack>
-              </PopoverContent>
+                {navItem.children && (
+                  <PopoverContent
+                    border={0}
+                    boxShadow='xl'
+                    bg={popoverContentBgColor}
+                    p={4}
+                    rounded='xl'
+                    minW='sm'
+                  >
+                    <Stack>
+                      {navItem.children.map((child) => (
+                        <DesktopSubNav
+                          key={child.label}
+                          {...child}
+                          onClose={onClose}
+                        />
+                      ))}
+                    </Stack>
+                  </PopoverContent>
+                )}
+              </>
             )}
           </Popover>
         </Box>
@@ -398,15 +406,17 @@ const DesktopNav = ({ navItems }: { navItems: Array<NavItem> }) => {
   )
 }
 
-const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
+const DesktopSubNav = ({ label, href, subLabel, onClose }: NavItem) => {
   return (
     <Link
-      href={href}
+      as={GatsbyLink}
+      to={href ?? '/'}
       role='group'
       display='block'
       p={2}
       rounded='md'
       _hover={{ bg: useColorModeValue('purple.50', 'gray.900') }}
+      onClick={onClose}
     >
       <Stack direction='row' align='center'>
         <Box>
@@ -456,8 +466,8 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
     <Stack spacing={4} onClick={children && onToggle}>
       <Flex
         py={2}
-        as={Link}
-        href={href ?? '#'}
+        as={GatsbyLink}
+        to={href ?? '#'}
         justify='space-between'
         align='center'
         _hover={{
@@ -492,7 +502,12 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
         >
           {children &&
             children.map((child) => (
-              <Link key={child.label} py={2} href={child.href}>
+              <Link
+                key={child.label}
+                as={GatsbyLink}
+                py={2}
+                to={child.href ?? '/'}
+              >
                 {child.label}
               </Link>
             ))}
@@ -507,6 +522,7 @@ interface NavItem {
   subLabel?: string
   children?: Array<NavItem>
   href?: string
+  onClose?: () => void
 }
 
 export default function Root(props: any) {

@@ -7,12 +7,13 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 import ThreadBriefCard from '../components/thread_brief_card'
 import rpc from '../services/rpc'
 import { Thread } from '../services/thread_pb'
-import { Sort, ThreadsQueryRequest } from '../services/treehole_pb'
+import { ThreadsQueryRequest } from '../services/treehole_pb'
 
-const IndexPage = ({ location }: any) => {
+const TrendPage = ({ location }: any) => {
   const [threads, setThreads] = useState<Thread.AsObject[]>(
     window.history.state?.threads ?? []
   )
+  const [hasMore, setHasMore] = useState(true)
   const MutexRunner = useMutex()
   const mutex = new MutexRunner('threadsLoader')
 
@@ -25,15 +26,12 @@ const IndexPage = ({ location }: any) => {
   const loadMore = useCallback(() => {
     mutex.run(async () => {
       mutex.lock()
-      const last =
-        threads.length === 0 ? '' : threads[threads.length - 1].lastReplyAt
+      const last = threads.length.toString()
       rpc.client
-        .getLatestThreads(
-          new ThreadsQueryRequest().setSort(Sort.SORTDESC).setLast(last),
-          {}
-        )
+        .getHottestThreads(new ThreadsQueryRequest().setLast(last), {})
         .then((res) => {
           setThreads((prevState) => {
+            if (res.getThreadsList().length === 0) setHasMore(false)
             const newState = [...prevState, ...res.toObject().threadsList]
             window.history.replaceState(
               { key: location.key, threads: newState },
@@ -49,14 +47,14 @@ const IndexPage = ({ location }: any) => {
   return (
     <Fade in style={{ flex: 1 }}>
       <Helmet>
-        <title>时间线</title>
+        <title>热门</title>
       </Helmet>
-      <Heading px={2}>时间线</Heading>
+      <Heading px={2}>热门</Heading>
 
       <Box mt={8}>
         <InfiniteScroll
           next={loadMore}
-          hasMore
+          hasMore={hasMore}
           loader={
             <Center maxW='2xl' h='12' mb={4}>
               <Spinner />
@@ -74,4 +72,4 @@ const IndexPage = ({ location }: any) => {
   )
 }
 
-export default IndexPage
+export default TrendPage

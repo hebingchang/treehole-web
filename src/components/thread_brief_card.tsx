@@ -57,7 +57,7 @@ const ThreadBriefCard = ({ thread }: ThreadBriefCardProps) => {
           {pangu.spacing(thread.preview)}
         </Text>
 
-        <HStack display='flex' justifyContent='space-between' mt={2}>
+        <HStack display='flex' justifyContent='space-between' mt={3}>
           <HStack display='flex' alignItems='baseline' spacing={1}>
             <Badge px='1.5'>{thread.category?.name}</Badge>
             {thread.tagsList.map((tag) => (
