@@ -65,6 +65,7 @@ import {
   setFeaturedTags,
 } from '../states/site'
 import store from '../states/store'
+import { getAvailableCategories } from '../utils/category'
 import { getWebSource } from '../utils/env'
 
 moment.locale('zh-cn')
@@ -109,7 +110,7 @@ const Layout = ({ children, pageContext }: any) => {
   const [loginState, setLoginState] = useState('使用 jAccount 登录')
   const dispatch = useAppDispatch()
   const user = useAppSelector(selectUser)
-  const categories = useAppSelector(selectCategories)
+  const categories = getAvailableCategories(useAppSelector(selectCategories))
   const featuredTags = useAppSelector(selectFeaturedTags)
 
   const navItems: Array<NavItem> = [
