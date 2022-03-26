@@ -98,7 +98,7 @@ const ThreadDetailCard = ({ thread, onUpdate }: ThreadDetailCardProps) => {
           </HStack>
 
           <Box mt={4}>
-            <ExcitedMarkdown children={pangu.spacing(_thread.content)} />
+            <ExcitedMarkdown children={_thread.content} />
           </Box>
 
           <HStack display='flex' justifyContent='space-between' mt={4}>

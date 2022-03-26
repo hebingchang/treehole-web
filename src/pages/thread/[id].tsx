@@ -1,4 +1,14 @@
-import { Box, Center, Checkbox, Fade, HStack, Spinner } from '@chakra-ui/react'
+import {
+  Box,
+  Center,
+  Checkbox,
+  Fade,
+  HStack,
+  SkeletonCircle,
+  SkeletonText,
+  Spinner,
+  Text,
+} from '@chakra-ui/react'
 import * as React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useMutex } from 'react-context-mutex'
@@ -23,6 +33,7 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
   const [sort, setSort] = useState(Sort.SORTASC)
   const [onlyAuthor, setOnlyAuthor] = useState(false)
   const [hasMore, setHasMore] = useState(true)
+  const [initiating, setInitiating] = useState(true)
 
   const MutexRunner = useMutex()
   const mutex = new MutexRunner('postsLoader')
@@ -37,6 +48,8 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
   }, [params.id])
 
   useEffect(() => {
+    setHasMore(false)
+    setInitiating(true)
     setPosts([])
     loadMore(true)
   }, [onlyAuthor])
@@ -63,7 +76,10 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
             else setPosts((prevState) => [...prevState, ...res.getPostsList()])
             setHasMore(res.getPostsList().length > 0)
           })
-          .finally(() => mutex.unlock())
+          .finally(() => {
+            setInitiating(false)
+            mutex.unlock()
+          })
       })
     },
     [posts, params.id, sort, onlyAuthor]
@@ -95,8 +111,8 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
         </Checkbox>
       </HStack>
 
-      {thread ? (
-        <Box mt={1}>
+      <Box mt={1}>
+        {thread ? (
           <Fade in={posts.length > 0}>
             <InfiniteScroll
               next={loadMore}
@@ -104,6 +120,13 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
               loader={
                 <Center maxW='2xl' h='12' mb={4}>
                   <Spinner />
+                </Center>
+              }
+              endMessage={
+                <Center maxW='2xl' h='12' mb={4}>
+                  <Text color='gray.500' size='sm'>
+                    暂无更多
+                  </Text>
                 </Center>
               }
               dataLength={posts.length}
@@ -124,8 +147,25 @@ const ThreadPage = ({ params }: { params: { id: number } }) => {
               ))}
             </InfiniteScroll>
           </Fade>
-        </Box>
-      ) : null}
+        ) : null}
+
+        {thread && initiating ? (
+          <Fade in>
+            <Box
+              maxW='2xl'
+              borderWidth='1px'
+              borderRadius='lg'
+              overflow='hidden'
+              my={4}
+            >
+              <Box py={[3, 5]} px={[4, 5]}>
+                <SkeletonCircle size='10' />
+                <SkeletonText mt='4' noOfLines={4} spacing='4' />
+              </Box>
+            </Box>
+          </Fade>
+        ) : null}
+      </Box>
     </Fade>
   )
 }

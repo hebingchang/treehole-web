@@ -40,7 +40,7 @@ const ThreadBriefCard = ({ thread }: ThreadBriefCardProps) => {
         <Box p='5'>
           <HStack display='flex' justifyContent='space-between' spacing={1}>
             <Badge>{formatThreadId(thread.model?.id)}</Badge>
-            <Box as='span' color='gray.500' fontSize='sm'>
+            <Box as='span' color='gray.500' fontSize='xs'>
               {getLastReplyAt(thread.lastReplyAt)}
             </Box>
           </HStack>

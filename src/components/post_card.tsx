@@ -1,4 +1,4 @@
-import { Box, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, Spinner, Tag, Text, VStack } from '@chakra-ui/react'
 import pangu from 'pangu'
 import React, { useEffect, useState } from 'react'
 import {
@@ -77,9 +77,14 @@ const PostCard = ({ post, thread, onUpdate }: PostCardProps) => {
               isAdmin={_post.identity?.type === IdentityType.IDENTITYTYPEADMIN}
             />
             <VStack spacing={0} alignItems='start'>
-              <Text fontWeight='600' fontSize={['sm', 'md']}>
-                {_post.identityCode}
-              </Text>
+              <HStack>
+                <Text fontWeight='600' fontSize={['sm', 'md']}>
+                  {_post.identityCode}
+                </Text>
+                {_post.identityCode === _thread.identityCode ? (
+                  <Tag size='sm'>楼主</Tag>
+                ) : null}
+              </HStack>
               <Text color='gray.500' fontSize={['xs', 'sm']}>
                 {getThreadTime(_post.model?.createdAt)}
               </Text>
@@ -111,7 +116,7 @@ const PostCard = ({ post, thread, onUpdate }: PostCardProps) => {
         ) : null}
 
         <Box mt={4}>
-          <ExcitedMarkdown children={pangu.spacing(_post.content)} />
+          <ExcitedMarkdown children={_post.content} />
         </Box>
 
         <HStack display='flex' justifyContent='space-between' mt={4}>
