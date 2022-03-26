@@ -106,6 +106,7 @@ const Layout = ({ children, pageContext }: any) => {
   const { colorMode, toggleColorMode } = useColorMode()
   const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
+  const [loginState, setLoginState] = useState('使用 jAccount 登录')
   const dispatch = useAppDispatch()
   const user = useAppSelector(selectUser)
   const categories = useAppSelector(selectCategories)
@@ -135,6 +136,7 @@ const Layout = ({ children, pageContext }: any) => {
 
   const logIn = () => {
     setLoading(true)
+    setLoginState('正在获取登录配置')
     rpc.client
       .getOAuthConfig(
         new OAuthConfigRequest().setChannel(
@@ -143,6 +145,8 @@ const Layout = ({ children, pageContext }: any) => {
         {}
       )
       .then(async (res) => {
+        setLoginState('等待 jAccount 回调')
+
         const settings: UserManagerSettings = {
           authority: 'https://jaccount.sjtu.edu.cn/oauth2',
           metadata: {
@@ -159,6 +163,7 @@ const Layout = ({ children, pageContext }: any) => {
 
         const handleLoginCallback = (e: MessageEvent<any>) => {
           if (e.origin === window.origin) {
+            setLoginState('正在验证令牌')
             popupWindow && popupWindow.close()
             window.removeEventListener('message', handleLoginCallback, true)
             rpc.client
@@ -174,6 +179,7 @@ const Layout = ({ children, pageContext }: any) => {
                 Cookies.set('treehole_session', res.getToken())
                 getProfile().finally(() => setLoading(false))
               })
+              .catch(() => setLoading(false))
           }
         }
 
@@ -185,6 +191,9 @@ const Layout = ({ children, pageContext }: any) => {
           width: 720,
           height: 480,
         })
+      })
+      .catch(() => {
+        setLoading(false)
       })
   }
 
@@ -215,7 +224,11 @@ const Layout = ({ children, pageContext }: any) => {
     window.addEventListener('beforeunload', () => {
       window.history.replaceState({}, '')
     })
-    getProfile().finally(() => setInitialized(true))
+    if (Cookies.get('treehole_session')) {
+      getProfile().finally(() => setInitialized(true))
+    } else {
+      setInitialized(true)
+    }
   }, [])
 
   if (pageContext.layout === 'auth') {
@@ -301,7 +314,14 @@ const Layout = ({ children, pageContext }: any) => {
                   <Image src={avatar} height={8} width={8} />
                 </MenuButton>
                 <MenuList>
-                  <MenuItem>退出登录</MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      Cookies.remove('treehole_session')
+                      dispatch(setUser(undefined))
+                    }}
+                  >
+                    退出登录
+                  </MenuItem>
                 </MenuList>
               </Menu>
             ) : null}
@@ -338,7 +358,13 @@ const Layout = ({ children, pageContext }: any) => {
             要继续访问亦可赛艇，您需要先验证您的身份。
           </Text>
           <Stack spacing={6}>
-            <Button colorScheme='purple' onClick={logIn} isLoading={loading}>
+            <Button
+              colorScheme='purple'
+              onClick={logIn}
+              isLoading={loading}
+              loadingText={loginState}
+              spinnerPlacement='start'
+            >
               使用 jAccount 登录
             </Button>
           </Stack>
