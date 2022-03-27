@@ -32,7 +32,7 @@ const JAAuthPage = () => {
   }, [])
 
   return (
-    <Center h={`${window.innerHeight}px`} w='100%'>
+    <Center h='100vh' w='100%'>
       <Helmet>
         <title>使用 jAccount 登录</title>
       </Helmet>
