@@ -104,7 +104,7 @@ const popupCenter = ({
 }
 
 const Layout = ({ children, pageContext }: any) => {
-  const { isOpen, onToggle } = useDisclosure()
+  const { isOpen, onToggle, onClose } = useDisclosure()
   const { colorMode, toggleColorMode } = useColorMode()
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
@@ -249,6 +249,7 @@ const Layout = ({ children, pageContext }: any) => {
         )}
         color={useColorModeValue('gray.600', 'white')}
         minH='60px'
+        maxH='100%'
         py={{ base: 2 }}
         px={{ base: 4 }}
         borderBottom={1}
@@ -262,8 +263,9 @@ const Layout = ({ children, pageContext }: any) => {
         right={0}
         zIndex={2}
         backdropFilter='saturate(180%) blur(20px)'
+        flexDirection='column'
       >
-        <Flex align='center' flex={1} maxW='container.xl'>
+        <Flex align='center' width='100%' maxW='container.xl'>
           <Flex
             flex={{ base: 1, md: 'auto' }}
             ml={{ base: -2 }}
@@ -341,16 +343,16 @@ const Layout = ({ children, pageContext }: any) => {
             ) : null}
           </Stack>
         </Flex>
+
+        <Box width='100%' flex={1} minH={0} overflowY='scroll'>
+          <Collapse in={isOpen} animateOpacity style={{ width: '100%' }}>
+            <MobileNav navItems={navItems} onClose={onClose} />
+          </Collapse>
+        </Box>
       </Flex>
 
-      <Box pt='60px'>
-        <Collapse in={isOpen} animateOpacity>
-          <MobileNav navItems={navItems} />
-        </Collapse>
-      </Box>
-
       {initialized && user ? (
-        <Container maxW='container.xl' px={[2, 4]} pt={8}>
+        <Container maxW='container.xl' px={[2, 4]} mt='60px' pt={8}>
           <HStack alignItems='start' justifyContent='space-between'>
             {children}
             <Box display={{ base: 'none', md: 'flex' }}>
@@ -487,21 +489,27 @@ const DesktopSubNav = ({ label, href, subLabel, onClose }: NavItem) => {
   )
 }
 
-const MobileNav = ({ navItems }: { navItems: Array<NavItem> }) => {
+const MobileNav = ({
+  navItems,
+  onClose,
+}: {
+  navItems: Array<NavItem>
+  onClose: () => void
+}) => {
   return (
     <Stack
-      bg={useColorModeValue('white', 'gray.800')}
+      // bg={useColorModeValue('white', 'gray.800')}
       p={4}
       display={{ md: 'none' }}
     >
       {navItems.map((navItem) => (
-        <MobileNavItem key={navItem.label} {...navItem} />
+        <MobileNavItem key={navItem.label} onClose={onClose} {...navItem} />
       ))}
     </Stack>
   )
 }
 
-const MobileNavItem = ({ label, children, href }: NavItem) => {
+const MobileNavItem = ({ label, children, href, onClose }: NavItem) => {
   const { isOpen, onToggle } = useDisclosure()
 
   return (
@@ -515,6 +523,7 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
         _hover={{
           textDecoration: 'none',
         }}
+        onClick={() => href && onClose && onClose()}
       >
         <Text
           fontWeight={600}
@@ -549,6 +558,7 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
                 as={GatsbyLink}
                 py={2}
                 to={child.href ?? '/'}
+                onClick={onClose}
               >
                 {child.label}
               </Link>
