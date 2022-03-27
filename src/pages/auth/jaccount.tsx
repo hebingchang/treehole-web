@@ -1,3 +1,4 @@
+import { navigate } from 'gatsby'
 import * as React from 'react'
 import { useEffect } from 'react'
 import { StringParam, useQueryParam } from 'use-query-params'
@@ -7,7 +8,7 @@ const JAAuthPage = () => {
 
   useEffect(() => {
     if (window.opener) window.opener.postMessage(code, '*')
-    else window.close()
+    else navigate('/')
   }, [])
 
   return (
