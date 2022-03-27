@@ -6,6 +6,7 @@ import { useMutex } from 'react-context-mutex'
 import { Helmet } from 'react-helmet'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import ThreadBriefCard from '../../components/thread_brief_card'
+import { useDidUpdateEffect } from '../../hooks/effect'
 import rpc from '../../services/rpc'
 import { Thread } from '../../services/thread_pb'
 import { Sort, ThreadsQueryRequest } from '../../services/treehole_pb'
@@ -35,7 +36,7 @@ const CategoryPage = ({
     }
   }, [])
 
-  useEffect(() => {
+  useDidUpdateEffect(() => {
     setThreads([])
     setHasMore(true)
     loadMore()
