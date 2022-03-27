@@ -54,6 +54,7 @@ import rpc from '../services/rpc'
 import {
   EmptyRequest,
   OAuthConfigRequest,
+  OAuthConfigResponse,
   OAuthLoginRequest,
 } from '../services/treehole_pb'
 import { selectUser, setUser } from '../states/credential'
@@ -105,9 +106,10 @@ const popupCenter = ({
 const Layout = ({ children, pageContext }: any) => {
   const { isOpen, onToggle } = useDisclosure()
   const { colorMode, toggleColorMode } = useColorMode()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
-  const [loginState, setLoginState] = useState('使用 jAccount 登录')
+  const [loginState, setLoginState] = useState('正在获取登录配置')
+  const [authConfig, setAuthConfig] = useState<OAuthConfigResponse>()
   const dispatch = useAppDispatch()
   const user = useAppSelector(selectUser)
   const categories = getAvailableCategories(useAppSelector(selectCategories))
@@ -135,67 +137,55 @@ const Layout = ({ children, pageContext }: any) => {
     },
   ]
 
-  const logIn = () => {
+  const logIn = async () => {
+    if (!authConfig) return
+
     setLoading(true)
-    setLoginState('正在获取登录配置')
-    rpc.client
-      .getOAuthConfig(
-        new OAuthConfigRequest().setChannel(
-          OAuthLoginChannel.LOGINWITHJACCOUNT
-        ),
-        {}
-      )
-      .then(async (res) => {
-        setLoginState('等待 jAccount 回调')
+    setLoginState('等待 jAccount 回调')
+    const settings: UserManagerSettings = {
+      authority: 'https://jaccount.sjtu.edu.cn/oauth2',
+      metadata: {
+        authorization_endpoint: authConfig.getAuthorizeUrl(),
+      },
+      client_id: authConfig.getClientId(),
+      scope: authConfig.getScopesList().join(' '),
+      redirect_uri: `${process.env.GATSBY_TREEHOLE_HOST}/auth/jaccount`,
+      popup_redirect_uri: `${process.env.GATSBY_TREEHOLE_HOST}/auth/jaccount`,
+      loadUserInfo: false,
+    }
+    const client = new OidcClient(settings)
+    const request = await client.createSigninRequest({})
 
-        const settings: UserManagerSettings = {
-          authority: 'https://jaccount.sjtu.edu.cn/oauth2',
-          metadata: {
-            authorization_endpoint: res.getAuthorizeUrl(),
-          },
-          client_id: res.getClientId(),
-          scope: res.getScopesList().join(' '),
-          redirect_uri: `${process.env.GATSBY_TREEHOLE_HOST}/auth/jaccount`,
-          popup_redirect_uri: `${process.env.GATSBY_TREEHOLE_HOST}/auth/jaccount`,
-          loadUserInfo: false,
-        }
-        const client = new OidcClient(settings)
-        const request = await client.createSigninRequest({})
+    const handleLoginCallback = (e: MessageEvent<any>) => {
+      if (e.origin === window.origin) {
+        setLoginState('正在验证令牌')
+        popupWindow && popupWindow.close()
+        window.removeEventListener('message', handleLoginCallback, true)
+        rpc.client
+          .oAuthLogin(
+            new OAuthLoginRequest()
+              .setChannel(OAuthLoginChannel.LOGINWITHJACCOUNT)
+              .setSource(LoginSource.LOGINSOURCEWEB)
+              .setWebSource(getWebSource())
+              .setCode(e.data),
+            {}
+          )
+          .then((res) => {
+            Cookies.set('treehole_session', res.getToken())
+            getProfile().finally(() => setLoading(false))
+          })
+          .catch(() => setLoading(false))
+      }
+    }
 
-        const handleLoginCallback = (e: MessageEvent<any>) => {
-          if (e.origin === window.origin) {
-            setLoginState('正在验证令牌')
-            popupWindow && popupWindow.close()
-            window.removeEventListener('message', handleLoginCallback, true)
-            rpc.client
-              .oAuthLogin(
-                new OAuthLoginRequest()
-                  .setChannel(OAuthLoginChannel.LOGINWITHJACCOUNT)
-                  .setSource(LoginSource.LOGINSOURCEWEB)
-                  .setWebSource(getWebSource())
-                  .setCode(e.data),
-                {}
-              )
-              .then((res) => {
-                Cookies.set('treehole_session', res.getToken())
-                getProfile().finally(() => setLoading(false))
-              })
-              .catch(() => setLoading(false))
-          }
-        }
+    window.addEventListener('message', handleLoginCallback, true)
 
-        window.addEventListener('message', handleLoginCallback, true)
-
-        const popupWindow = popupCenter({
-          url: request.url,
-          title: '使用 jAccount 登录',
-          width: 720,
-          height: 480,
-        })
-      })
-      .catch(() => {
-        setLoading(false)
-      })
+    const popupWindow = popupCenter({
+      url: request.url,
+      title: '使用 jAccount 登录',
+      width: 720,
+      height: 480,
+    })
   }
 
   const getProfile = async () => {
@@ -230,6 +220,20 @@ const Layout = ({ children, pageContext }: any) => {
     } else {
       setInitialized(true)
     }
+
+    rpc.client
+      .getOAuthConfig(
+        new OAuthConfigRequest().setChannel(
+          OAuthLoginChannel.LOGINWITHJACCOUNT
+        ),
+        {}
+      )
+      .then(async (res) => {
+        setAuthConfig(res)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   if (pageContext.layout === 'auth') {
