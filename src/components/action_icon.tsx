@@ -91,10 +91,12 @@ const ActionIcon = ({
       <Icon
         as={active ? activeIcon : icon}
         color={active ? activeColor ?? 'red.500' : color ?? 'gray.500'}
+        w='18px'
+        h='18px'
       />
       <Text
         color={active ? activeColor ?? 'red.500' : color ?? 'gray.500'}
-        fontSize='xs'
+        fontSize='sm'
       >
         {value}
       </Text>

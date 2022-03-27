@@ -145,7 +145,7 @@ const PostCard = ({ post, thread, onUpdate }: PostCardProps) => {
             }}
           />
 
-          <HStack display='flex' alignItems='center' spacing={3}>
+          <HStack display='flex' alignItems='center' spacing={4}>
             {updating ? <Spinner color='gray.500' w={3.5} h={3.5} /> : null}
             <ActionIcon
               icon={AiOutlineLike}

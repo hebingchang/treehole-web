@@ -56,6 +56,13 @@ const ExcitedMarkdown = ({ ...props }: PostCardProps) => {
             </Heading>
           )
         },
+        h4({ level, node, children }) {
+          return (
+            <Heading as='h4' size='sm' mb={1} mt={2}>
+              {children}
+            </Heading>
+          )
+        },
       }}
     />
   )
