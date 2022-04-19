@@ -11,5 +11,6 @@ const apiProxy = createProxyMiddleware({
 })
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
+  req.query = {}
   return apiProxy(req, res)
 }
