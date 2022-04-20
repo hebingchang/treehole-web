@@ -11,6 +11,6 @@ const apiProxy = createProxyMiddleware({
 })
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
-  req.query = {}
+  req.url = req.url ? req.url.split(/[?#]/)[0] : req.url
   return apiProxy(req, res)
 }
